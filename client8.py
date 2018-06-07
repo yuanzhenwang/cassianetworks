@@ -1,13 +1,9 @@
-# from urllib2 import Request, urlopen
 import requests
 import base64
 import json
 import threading
-import re, sys, os
 import time
 import socket
-import paramiko
-import csv
 
 scanning_aps = []
 headers = {}
@@ -24,7 +20,7 @@ global MONITOR, ssh_client, sftp_client, copy_timer
 
 # 读取配置文件
 def init_config():
-    global HOST, user, pwd, active, server, INTERVAL, PER_COUNT, test_time, ac_root_pwd, data_path, test_mode, active
+    global HOST, user, pwd, active, server, INTERVAL, PER_COUNT, test_time, ac_root_pwd, data_path, active
     try:
         with open('test.conf', 'r', encoding='utf-8') as conf:
             for line in conf:
@@ -33,7 +29,6 @@ def init_config():
                     if line.startswith('#'):
                         pass
                     else:
-                        # print('line:',ascii(line[0]))
                         key = line.split('=')[0].strip()
                         value = line.split('=')[1].strip()
                         if key == 'HOST':
@@ -52,8 +47,6 @@ def init_config():
                             ac_root_pwd = value
                         elif key == 'data_path':
                             data_path = value
-                        elif key == 'run_mode':
-                            run_mode = value
                         elif key == 'avtive':
                             active = value
             print('配置文件读取成功！\n')
@@ -78,7 +71,7 @@ def connect_to_server():
 
 
 # 数据处理函数，负责解析从服务器接受到的参数以及向服务器发送数据
-def send_para(sock, data, data_type):
+def send_para( sock, data, data_type):
     # 定义全局测试参数
     global PC_COUNT, PC_NO, START_TIME, INTERVAL, PER_COUNT, HUBS, sessionID, scanning_aps, user, pwd, HOST, test_mode
     if data_type == 'config_res':
@@ -112,20 +105,16 @@ def send_para(sock, data, data_type):
 # 开始AP扫描
 def scan(sock, mac, bak=False):
     # print('thread %s is running...' % threading.current_thread().name)
-    global scanning_aps, scan_data_count, sockt, HOST, headers
+    global scanning_aps, scan_data_count, HOST, headers
     flag = True
     try:
         data = {"event": 1, 'mac': mac}
-        # print(data)
         res = requests.get(HOST + '/gap/nodes', params=data, headers=headers, stream=True)
-        # file_name = 'res_of_'+ re.sub('[^0-9A-F]','',mac) +'.txt'
         for line in res.iter_lines():
-            # filter out keep-alive new lines
             s = str(line, encoding='utf-8')
-            # print(s)
             if s.startswith('data'):
                 # 检查是否为第一条扫描数据，是第一条的话就将开启扫描的AP数量+1；该条件语句只会执行一次
-                if flag == True:
+                if flag == True :
                     # 检查是否为备用AP开启扫描
                     if bak:
                         print("Bak ap %s start scan success!" % mac)
@@ -144,7 +133,7 @@ def scan(sock, mac, bak=False):
                         flag = False
                         scan_data_count = scan_data_count + 1
                 else:
-                    scan_data_count = scan_data_count + 1  # print(s)  # print(' AP %s scan count is %d \r'%(mac,count),end ='')  # with open('./scan_result/'+file_name,'a') as f:  # 	f.write(str(count)+'\n')
+                    scan_data_count = scan_data_count + 1
     except Exception as e:
         if str(e) == "'NoneType' object has no attribute 'read'":
             pass
@@ -183,8 +172,8 @@ def scan_speed():
 
 
 # 设置请求头
-def set_header(user, pwd):
-    global headers, sethead_timer, HOST
+def set_header( user, pwd ):
+    global headers, set_head_timer, HOST, TOKEN
     use_info = user + ':' + pwd
     # 编码开发者帐号
     encode_info = base64.b64encode(use_info.encode('utf-8'))
@@ -207,8 +196,8 @@ def set_header(user, pwd):
     headers = {'Content-Type': 'application/json', 'version': '1', 'Authorization': 'Bearer ' + TOKEN}
     # print(headers)
     # noinspection PyTypeChecker
-    sethead_timer = threading.Timer(3500, set_header, (user, pwd))
-    sethead_timer.start()
+    set_head_timer = threading.Timer(3500, set_header, (user, pwd))
+    set_head_timer.start()
 
 
 # 一次性开启所有在线AP扫描
@@ -263,7 +252,6 @@ def start_test():
 def stop_test(sock):
     global TESTING
     TESTING = False
-    ip = HOST.split('/')[2]
     try:
         sock.close()
         # MONITOR.close()
@@ -272,13 +260,13 @@ def stop_test(sock):
         print('Stop ap scan speed monitor thread!\n')
         # copy_timer.cancel()
         # print('Stop data copy thread!\n')
-        sethead_timer.cancel()
+        set_head_timer.cancel()
         print('Stop token update thread!\n')
     except Exception as e:
         print(e)
     print('Stopping ap scan...\n')
     for key, value in SSE_CLIENT.items():
-        value.close()  # print("ap %s stop scan!"%key)
+        value.close()
     print('All ap have stoped scan!\n\nTest finished!\n')
 
 
@@ -304,7 +292,7 @@ def hub_status():
                     print('当前扫描的AP总数为：%s\n\n' % len(scaning_aps), end='')
             else:
                 pass
-    except Exception as e:
+    except :
         print('Stop monitor ap.')
 
 

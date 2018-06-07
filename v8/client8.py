@@ -186,7 +186,7 @@ def scan_speed():
 
 #设置请求头
 def set_header(user,pwd):
-	global headers,sethead_timer,HOST
+	global headers,set_head_timer,HOST
 	use_info = user+':'+pwd
 	#编码开发者帐号
 	encode_info =base64.b64encode(use_info.encode('utf-8'))
@@ -216,8 +216,8 @@ def set_header(user,pwd):
 	}
 	# print(headers)
     # noinspection PyTypeChecker
-    sethead_timer = threading.Timer(3500,set_header,(user,pwd))
-	sethead_timer.start()
+    set_head_timer = threading.Timer(3500, set_header, (user, pwd))
+	set_head_timer.start()
 
 #一次性开启所有在线AP扫描
 def all_ap_scan(sock,hubs):
@@ -279,7 +279,7 @@ def stop_test(sock):
 		print('Stop ap scan speed monitor thread!\n')
 		# copy_timer.cancel()
 		# print('Stop data copy thread!\n')
-		sethead_timer.cancel()
+		set_head_timer.cancel()
 		print('Stop token update thread!\n')
 	except Exception as e:
 		print(e)

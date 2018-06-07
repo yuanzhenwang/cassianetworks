@@ -18,7 +18,6 @@ CLIENT_INFO = []
 TESTING = True
 config = {}
 
-
 def init_config():
     global config
     try:
@@ -202,8 +201,8 @@ def get_scanning_ap():
 def hubStatus():
     global OFFLINE_APS
     try:
-        hubstatus = requests.get(config['host'] + '/cassia/hubStatus', headers=headers, stream=True)
-        for line in hubstatus.iter_lines():
+        hub_status = requests.get(config['host'] + '/cassia/hubStatus', headers=headers, stream=True)
+        for line in hub_status.iter_lines():
             if TESTING:
                 message = str(line, encoding='utf-8')
                 if message.startswith('data'):
@@ -349,7 +348,7 @@ def copy_file(flag=True):
         for file in files:
             sftp_client.get(src + file, config['data_path'] + file)
         print('成功从AC拷贝测试结果文件到目录%s\n' % config['data_path'])
-    except Exception as e:
+    except:
         # 只有在结束测试时，拷贝失败尝试重新拷贝,默认为不重试
         if flag:
             pass
@@ -363,7 +362,7 @@ def copy_file(flag=True):
                 except Exception as e:
                     print(e)
                 no += 1
-            print('从服务器copy文件失败，请手动copy\n', e)
+            print('从服务器copy文件失败，请手动copy\n')
             return
 
     write_csv()
@@ -388,7 +387,6 @@ def write_csv():
                 nfm_rows = [['name', 'CPU', 'MEM']]
                 ac_rows = [['name', 'CPU', 'MEM']]
                 mongod_rows = [['name', 'CPU', 'MEM']]
-                node_rows = [['name', 'CPU', 'MEM']]
                 cpu_total_rows = [['name', 'us', 'sy', 'id', 'wa', 'si']]
                 mem_total_rows = [['name', 'free', 'used', 'total', 'buff']]
                 nodes = {}
