@@ -3,7 +3,7 @@ import requests
 import base64
 import json
 import threading
-import re,sys,os
+import os
 import time
 import socket
 import paramiko
@@ -186,6 +186,7 @@ def init_monitor_client():
 	ip = HOST.split('/')[2]
 	try:
 		#初始化sftp客户端
+		# noinspection PyTypeChecker
 		ftp = paramiko.Transport((ip,22))
 		ftp.connect(username='root',password= ac_root_pwd)
 		sftp_client = paramiko.SFTPClient.from_transport(ftp)
@@ -207,6 +208,7 @@ def init_monitor_client():
 		history_files = sftp_client.listdir(src)
 	except:
 		sftp_client.mkdir(src)
+		history_files = sftp_client.listdir(src)
 	if len(history_files)>0:
 		print('删除历史遗留数据文件!\n')
 		for file in history_files:
@@ -273,7 +275,7 @@ def scan(sock,mac,bak=False):
 		res = requests.get(HOST + '/gap/nodes',params = data,headers = headers,stream =True)
 			# file_name = 'res_of_'+ re.sub('[^0-9A-F]','',mac) +'.txt'
 		for line in res.iter_lines():
-		    # filter out keep-alive new lines
+			# filter out keep-alive new lines
 			s = str(line,encoding = 'utf-8')
 			# print(s)
 			if s.startswith('data'):
@@ -377,6 +379,7 @@ def set_header(user,pwd):
 	  'Authorization':'Bearer ' + TOKEN
 	}
 	# print(headers)
+	# noinspection PyTypeChecker
 	sethead_timer = threading.Timer(3500,set_header,(user,pwd))
 	sethead_timer.start()
 

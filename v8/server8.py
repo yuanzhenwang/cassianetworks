@@ -185,7 +185,8 @@ def get_scanning_ap():
 	while True:
 		for hub in SCANNING_APS:
 			total = total + len(hub)
-		if total < len(hubs):
+        # noinspection PyTypeChecker
+        if total < len(hubs):
 			for client in CLIENTS:
 				client.send(bytes('scanning_aps_req',encoding = 'utf-8'))
 				time.sleep(1)
@@ -251,14 +252,16 @@ def start_test(clients):
 	init_monitor_client()
 	start_ac_monitor()
 	if config['test_mode'] == 0:
-		COPY_TIMER = threading.Timer(600,copy_file,args = (True,))
+		# noinspection PyTypeChecker
+        COPY_TIMER = threading.Timer(600,copy_file,args = (True,))
 		COPY_TIMER.start()
 	msg = {'msg_type':'test_start'}
 	for client in clients:
 		client.send(bytes(str(msg),encoding = 'utf-8'))
 		time.sleep(1)
 	threading.Thread(target = hubStatus).start()
-	threading.Timer(config['test_time'],stop_test,args =(clients,)).start()
+    # noinspection PyTypeChecker
+    threading.Timer(config['test_time'],stop_test,args =(clients,)).start()
 
 def start_ac_monitor():	#开始新的监控进程，生成全新的测试文件
 	ip = config['host'].split('/')[2]
@@ -290,7 +293,8 @@ def init_monitor_client():		#初始化性能监控工具
 	ip = config['host'].split('/')[2]
 	try:
 		#初始化sftp客户端
-		ftp = paramiko.Transport((ip,22))
+        # noinspection PyTypeChecker
+        ftp = paramiko.Transport((ip,22))
 		ftp.connect(username='root',password= config['ac_root_pwd'])
 		sftp_client = paramiko.SFTPClient.from_transport(ftp)
 		#初始化ssh客户端

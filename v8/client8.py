@@ -215,7 +215,8 @@ def set_header(user,pwd):
 	  'Authorization':'Bearer ' + TOKEN
 	}
 	# print(headers)
-	sethead_timer = threading.Timer(3500,set_header,(user,pwd))
+    # noinspection PyTypeChecker
+    sethead_timer = threading.Timer(3500,set_header,(user,pwd))
 	sethead_timer.start()
 
 #一次性开启所有在线AP扫描
